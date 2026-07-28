@@ -8,10 +8,10 @@ def render_calculadora_pac_reverso():
     col_dim1, col_dim2 = st.columns(2)
     with col_dim1:
         peso_fisico = st.number_input("Peso Físico Real (kg)", min_value=0.0, step=0.1, key="pac_peso")
-        comprimento = st.number_input("Comprimento (cm)", min_value=0.0, step=1.0, key="pac_comp")
+        comprimento_m = st.number_input("Comprimento (m)", min_value=0.0, step=0.01, format="%.2f", key="pac_comp")
     with col_dim2:
-        largura = st.number_input("Largura (cm)", min_value=0.0, step=1.0, key="pac_larg")
-        altura = st.number_input("Altura (cm)", min_value=0.0, step=1.0, key="pac_alt")
+        largura_m = st.number_input("Largura (m)", min_value=0.0, step=0.01, format="%.2f", key="pac_larg")
+        altura_m = st.number_input("Altura (m)", min_value=0.0, step=0.01, format="%.2f", key="pac_alt")
 
     # Região de Destino/Origem do Cliente
     regiao_cliente = st.selectbox(
@@ -20,12 +20,18 @@ def render_calculadora_pac_reverso():
     )
 
     if st.button("Calcular Estimativa de Frete", type="primary", use_container_width=True):
-        if peso_fisico > 0 and comprimento > 0 and largura > 0 and altura > 0:
+        if peso_fisico > 0 and comprimento_m > 0 and largura_m > 0 and altura_m > 0:
+            
+            # --- CONVERSÃO PARA CM ---
+            # A fórmula dos Correios exige centímetros, então convertemos aqui invisivelmente
+            comprimento = comprimento_m * 100
+            largura = largura_m * 100
+            altura = altura_m * 100
             
             # --- VALIDAÇÃO DE LIMITES REAIS DOS CORREIOS ---
             soma_dimensoes = comprimento + largura + altura
             if comprimento > 100 or largura > 100 or altura > 100 or peso_fisico > 30 or soma_dimensoes > 200:
-                st.error("❌ **NÃO SEGUE POR CORREIOS!** O pacote ultrapassa os limites permitidos pelo PAC (Máx: 30kg, 100cm por lado ou 200cm na soma total). **Acione coleta por Transportadora.**")
+                st.error("❌ **NÃO SEGUE POR CORREIOS!** O pacote ultrapassa os limites permitidos pelo PAC (Máx: 30kg, 1m por lado ou 2m na soma total). **Acione coleta por Transportadora.**")
                 return
 
             # --- CÁLCULO DE CUBAGEM ---
